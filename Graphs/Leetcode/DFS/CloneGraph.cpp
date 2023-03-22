@@ -66,13 +66,8 @@ public:
         if (node == NULL)
             return NULL;
 
-        if (node->neighbors.size() == 0) {
-            Node * n= new Node(1);
-            return n;
-        }
         unordered_map<Node*,Node*> visited;
         return dfs(node,visited);
-
     }
 };
 int main() {
