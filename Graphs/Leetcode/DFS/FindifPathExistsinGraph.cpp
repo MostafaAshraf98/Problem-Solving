@@ -36,7 +36,7 @@ pathExists(const vector<vector<int>> &adjacencyList, unordered_map<int, bool> &v
     vector<int> neighbors = adjacencyList[currentNode];
     bool result = false;
     for (int neighbor: neighbors) {
-        result = pathExists((adjacencyList, visited, neighbor, targetNode));
+        result = pathExists(adjacencyList, visited, neighbor, targetNode);
         if (result)
             break;
     }
@@ -54,7 +54,7 @@ public:
             adjacencyList[to].push_back(from);
             adjacencyList[from].push_back(to);
         }
-        unordered_map<int,bool> visited
+        unordered_map<int, bool> visited;
         return pathExists(adjacencyList,visited,source,destination);
     }
 };
