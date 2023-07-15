@@ -24,7 +24,6 @@ typedef vector<int> vi;
 #define endl '\n';
 const int N = (int) 10e4;
 
-/*
 // Definition for a Node.
 class Node {
 public:
@@ -43,7 +42,6 @@ public:
         neighbors = _neighbors;
     }
 };
-*/
 
 class Solution {
 
