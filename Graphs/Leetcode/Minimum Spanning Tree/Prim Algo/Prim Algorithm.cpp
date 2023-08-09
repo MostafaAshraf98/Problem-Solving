@@ -56,12 +56,14 @@ public:
     {
         if (points.size() == 0)
             return 0;
-        int result = 0;
+
         priority_queue<Edge> pq;
         vector<int> visited(points.size(), false);
         visited[0] = true;
+
         int x1 = points[0][0];
         int y1 = points[0][1];
+
         for (int j = 1; j < points.size(); j++)
         {
             int x2 = points[j][0];
@@ -70,18 +72,25 @@ public:
             Edge edge(0, j, dist);
             pq.push(edge);
         }
+
         int count = points.size() - 1;
+        int result = 0;
+
         while (!pq.empty() && count > 0)
         {
             Edge edge = pq.top();
             pq.pop();
+
             int point1 = edge.point1;
             int point2 = edge.point2;
             int dist = edge.cost;
+            
             if (!visited[point2])
             {
                 visited[point2] = true;
                 result += dist;
+                count--;
+
                 int x1 = points[point2][0];
                 int y1 = points[point2][1];
                 for (int j = 0; j < points.size(); j++)
@@ -95,7 +104,6 @@ public:
                         pq.push(edge);
                     }
                 }
-                count--;
             }
         }
         return result;

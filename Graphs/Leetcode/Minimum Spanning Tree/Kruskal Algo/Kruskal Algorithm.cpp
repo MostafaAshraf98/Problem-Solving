@@ -85,34 +85,37 @@ public:
     // Kruskal's algorithm
     int minCostConnectPoints(vector<vector<int>> &points)
     {
-        if (points.size() == 0)
+        int sz = points.size();
+        if (sz == 0)
         {
             return 0;
         }
-        int sz = points.size();
         priority_queue<Edge> pq;
-        UnionFind uf(sz);
 
         for (int i = 0; i < sz; i++)
         {
-            vector<int> &coordinate1 = points[i];
+            int x1 = points[i][0];
+            int y1 = points[i][1];
+
             for (int j = i + 1; j < sz; j++)
             {
-                vector<int> &coordinate2 = points[j];
-                // Calculate the distance between two coordinates.
-                int cost = abs(coordinate1[0] - coordinate2[0]) +
-                           abs(coordinate1[1] - coordinate2[1]);
-                Edge edge(i, j, cost);
+                int x2 = points[j][0];
+                int y2 = points[j][1];
+                int dist = abs(x1 - x2) + abs(y1 - y2);
+                Edge edge(i, j, dist);
                 pq.push(edge);
             }
         }
 
+        UnionFind uf(sz);
         int result = 0;
         int count = sz - 1;
+
         while (!pq.empty() && count > 0)
         {
             Edge edge = pq.top();
             pq.pop();
+
             if (!uf.connected(edge.point1, edge.point2))
             {
                 uf.unionSet(edge.point1, edge.point2);
