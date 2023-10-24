@@ -24,36 +24,29 @@ typedef vector<int> vi;
 #define endl '\n';
 const int N = (int)10e4;
 
+// ACCEPTED
+// HashMap
+
 class Solution
 {
 public:
-    int findCheapestPrice(int n, vector<vector<int>> &flights, int src, int dst, int k)
+    int subarraySum(vector<int> &nums, int k)
     {
-        if (src == dst)
-            return 0;
-
-        vector<int> previous(n, INT_MAX);
-        vector<int> current(n, INT_MAX);
-        previous[src] = 0;
-
-        // loop over all the edges (the maximum number of used edges)
-        for (int i = 1; i <= k + 1; i++)
+        unordered_map<int, int> mp;
+        int sum = 0;
+        int result = 0;
+        for (int i = 0; i < nums.size(); i++)
         {
-            current[src] = 0;
-            for (vector<int> flight : flights)
-            {
-                int from = flight[0];
-                int to = flight[1];
-                int price = flight[2];
+            sum += nums[i];
+            if (mp.find(sum - k) != mp.end())
+                result += mp[sum - k];
 
-                if (previous[from] < INT_MAX)
-                {
-                    current[to] = min(current[to], previous[from] + price);
-                }
-            }
-            previous.assign(current.begin(), current.end());
+            if (mp.find(sum) != mp.end())
+                mp[sum]++;
+            else
+                mp[sum] = 1;
         }
-        return current[dst] == INT_MAX ? -1 : current[dst];
+        return result;
     }
 };
 

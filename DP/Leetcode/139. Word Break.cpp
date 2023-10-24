@@ -24,6 +24,8 @@ typedef vector<int> vi;
 #define endl '\n';
 const int N = (int)10e4;
 
+//Accepted
+
 class Solution
 {
 public:
