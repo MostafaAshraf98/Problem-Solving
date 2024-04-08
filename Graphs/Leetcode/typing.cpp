@@ -38,6 +38,7 @@ bool operator<(const Edge &edge1, const Edge &edge2)
     return edge1.cost > edge2.cost;
 }
 
+// Used for disjoint sets and in kruskal algorithm
 class UnionFind
 {
 private:
@@ -57,12 +58,12 @@ public:
 
     int find(int x)
     {
-        if (root[x] == x)
+        if (x == root[x])
             return x;
         return root[x] = find(root[x]);
     }
 
-    int unionSet(int x, int y)
+    void unionSet(int x, int y)
     {
         int rootX = find(x);
         int rootY = find(y);
@@ -74,8 +75,8 @@ public:
                 root[rootX] = rootY;
             else
             {
-                root[rootY] = rootX;
                 rank[rootX]++;
+                root[rootY] = rootX;
             }
             count--;
         }
@@ -84,24 +85,24 @@ public:
     {
         return count;
     }
-    int isConnected(int x, int y)
+    bool isConnected(int x, int y)
     {
-        return find(x) == find(y);
+        return find(y) == find(x);
     }
 };
 
-void bfs(vector<vector<int>> adj, int n)
+void bfs(vector<vector<int>> &adj, int n)
 {
     queue<int> q;
-    vector<bool> visited(n, false);
+    vector<bool> visited(n);
+
     q.push(0);
     visited[0] = true;
     while (!q.empty())
     {
         int currentNode = q.front();
         q.pop();
-        vector<int> neighbors = adj[currentNode];
-        for (int neighbor : neighbors)
+        for (int neighbor : adj[currentNode])
         {
             if (!visited[neighbor])
             {
@@ -112,80 +113,79 @@ void bfs(vector<vector<int>> adj, int n)
     }
 }
 
-void dfs(const vector<vector<int>> &adj, vector<bool> &visited, const int &n, int currentNode)
+void dfs(const vector<vector<int>> &adj, const int &n, vector<bool> visited, int currentNode)
 {
     for (int neighbor : adj[currentNode])
     {
-        if (!visited[neighbor])
+        if (!visited[currentNode])
         {
-            visited[neighbor] = true;
-            dfs(adj, visited, n, currentNode);
+            visited[currentNode] = true;
+            dfs(adj, n, visited, neighbor);
         }
     }
 }
 
-int kruskal(vector<vector<int>> edges, int n)
+// minimum spanning tree
+int kruskal(const vector<vector<int>> edges, int n)
 {
     priority_queue<Edge> pq;
-    for (vector<int> edge : edges)
+
+    for (auto edge : edges)
     {
-        int from = edge[0];
-        int to = edge[1];
-        int cost = edge[2];
-        Edge newEdge(from, to, cost);
-        pq.push(newEdge);
+        Edge edge(edge[0], edge[1], edge[2]);
+        pq.push(edge);
     }
+
     UnionFind uf(n);
-    int result = 0;
     int count = n - 1;
-    while (!pq.empty() && count != 0)
+    int result = 0;
+
+    while (!pq.empty() && count > 0)
     {
-        Edge edge = pq.top();
+        Edge currentEdge = pq.top();
         pq.pop();
-        if (!uf.isConnected(edge.point1, edge.point2))
+        if (!uf.isConnected(currentEdge.point1, currentEdge.point2))
         {
-            result += edge.cost;
+            uf.unionSet(currentEdge.point1, currentEdge.point2);
             count--;
-            uf.unionSet(edge.point1, edge.point2);
+            result += currentEdge.cost;
         }
     }
     return result;
 }
 
-int prim(vector<vector<pair<int, int>>> adj, int n)
+int prim(const vector<vector<pair<int, int>>> adj, int n)
 {
     priority_queue<Edge> pq;
-    vector<bool> visited(n, false);
+    vector<bool> visited(n);
 
     visited[0] = true;
-    for (pair<int, int> neighbor : adj[0])
+    for (auto edge : adj[0])
     {
-        Edge edge(0, neighbor.second, neighbor.first);
-        pq.push(edge);
+        Edge newEdge(0, edge.second, edge.first);
+        pq.push(newEdge);
     }
-
     int result = 0;
     int count = n - 1;
-    while (!pq.empty() && count != 0)
+    while (!pq.empty() && count > 0)
     {
-        Edge edge = pq.top();
+        Edge currentEdge = pq.top();
         pq.pop();
-        int point1 = edge.point1;
-        int point2 = edge.point2;
-        int cost = edge.cost;
+        int point1 = currentEdge.point1;
+        int point2 = currentEdge.point2;
+        int cost = currentEdge.cost;
         if (!visited[point2])
         {
             visited[point2] = true;
             result += cost;
             count--;
-            for (pair<int, int> neighbor : adj[point2])
-            {
 
-                if (!visited[neighbor.second])
+            for (auto edge : adj[point2])
+            {
+                if (!visited[edge.second])
                 {
-                    visited[neighbor.second] = true;
-                    Edge edge(point2, neighbor.second, neighbor.first);
-                    pq.push(edge);
+                    Edge newEdge(point2, edge.second, edge.first);
+                    pq.push(newEdge);
                 }
             }
         }
@@ -193,7 +193,7 @@ int prim(vector<vector<pair<int, int>>> adj, int n)
     return result;
 }
 
-int djikstra(vector<vector<pair<int, int>>> adj, int n, int src, int dst)
+int djikstra(const vector<vector<pair<int, int>>> adj, int n, int src, int dst)
 {
     if (src == dst)
         return 0;
@@ -202,42 +202,44 @@ int djikstra(vector<vector<pair<int, int>>> adj, int n, int src, int dst)
     vector<int> cost(n, INT_MAX);
 
     cost[src] = 0;
-    pq.push({0, 0});
+    pq.push({0, src});
+
     while (!pq.empty())
     {
         int currentNode = pq.top().second;
-        int currentCost = pq.top().first;
-        pq.pop();
-        if (cost[currentNode] < currentCost)
+        int currentWeight = pq.top().first;
+        if (cost[currentNode] < currentWeight)
             continue;
-        for (pair<int, int> edge : adj[currentNode])
+
+        for (auto edge : adj[currentNode])
         {
             int neighbor = edge.second;
-            int weight = edge.second;
-            int newCost = currentCost + weight;
+            int weight = edge.first;
+            int newCost = currentWeight + weight;
             if (newCost < cost[neighbor])
             {
-                pq.push({newCost, neighbor});
                 cost[neighbor] = newCost;
+                pq.push({newCost, neighbor});
             }
         }
     }
+
     return cost[dst] == INT_MAX ? -1 : cost[dst];
 }
 
-int bellmanFord_standard(vector<vector<int>> edges, int n, int k, int src, int dst)
+int bellmanFord_standard(vector<vector<int>> edges, int n, int src, int dst, int k)
 {
     if (src == dst)
         return 0;
 
-    vector<int> current(n, INT_MAX);
     vector<int> previous(n, INT_MAX);
+    vector<int> current(n, INT_MAX);
 
     previous[src] = 0;
     for (int i = 0; i < k; i++)
     {
-        current[src] = true;
-        for (vector<int> edge : edges)
+        current[src] = 0;
+        for (auto edge : edges)
         {
             int from = edge[0];
             int to = edge[1];
@@ -254,32 +256,30 @@ int bellmanFord_SPFA(vector<vector<pair<int, int>>> adj, int n, int src, int dst
 {
     if (src == dst)
         return 0;
-
-    vector<int> current(n, INT_MAX);
-    vector<bool> visited(n, false);
     queue<int> q;
+    vector<bool> visited(n, false);
+    vector<int> current(n, INT_MAX);
 
-    current[src] = 0;
-    visited[src] = true;
     q.push(src);
-
+    visited[src] = true;
+    current[src] = 0;
     while (!q.empty())
     {
         int currentNode = q.front();
         q.pop();
         visited[currentNode] = false;
-        for (pair<int, int> edge : adj[currentNode])
+        for (auto edge : adj[currentNode])
         {
-            int to = edge.second;
+            int neighbor = edge.second;
             int weight = edge.first;
-            int newCost = current[currentNode] + weight;
-            if (current[to] > newCost)
+            int newCost = weight + current[currentNode];
+            if (newCost < current[neighbor])
             {
-                current[to] = newCost;
-                if (!visited[to])
+                current[neighbor] = newCost;
+                if (!visited[neighbor])
                 {
-                    visited[to] = true;
-                    q.push(to);
+                    visited[neighbor] = true;
+                    q.push(neighbor);
                 }
             }
         }
@@ -289,8 +289,8 @@ int bellmanFord_SPFA(vector<vector<pair<int, int>>> adj, int n, int src, int dst
 
 vector<int> khan(vector<vector<int>> adj, int n)
 {
-    vector<int> inDegrees(n, 0);
     vector<int> result;
+    vector<int> inDegrees(n, 0);
     queue<int> zeroDegrees;
 
     for (int i = 0; i < n; i++)
@@ -304,13 +304,13 @@ vector<int> khan(vector<vector<int>> adj, int n)
     while (!zeroDegrees.empty())
     {
         int currentNode = zeroDegrees.front();
-        zeroDegrees.pop();
         result.push_back(currentNode);
+        zeroDegrees.pop();
         for (int neighbor : adj[currentNode])
         {
             inDegrees[neighbor]--;
             if (inDegrees[neighbor] == 0)
-                zeroDegrees.push(neighbor);
+                q.push(neighbor);
         }
     }
     if (result.size() != n)

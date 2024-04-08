@@ -27,23 +27,22 @@ const int N = (int)10e4;
 class Solution
 {
 public:
-    int solve(const vector<int> &nums, vector<int> &memo, int currentIndex)
+    int rangeBitwiseAnd(int left, int right)
     {
-        if (currentIndex >= nums.size())
-            return 0;
-        if (memo[currentIndex] != -1)
-            return memo[currentIndex];
+        if (right == left)
+            return right;
+        int ans = 0;
 
-        int rob = nums[currentIndex] + solve(nums, memo, currentIndex + 2);
-
-        int noRob = solve(nums, memo, currentIndex + 1);
-
-        return memo[currentIndex] = max(rob, noRob);
-    }
-    int rob(vector<int> &nums)
-    {
-        vector<int> memo(nums.size(), -1);
-        return solve(nums, memo, 0);
+        for (int i = 31; i >= 0; i--)
+        {
+            int l = left & (1 << i);
+            int r = right & (1 << i);
+            if (l == r)
+                ans |= l;
+            else 
+                break;
+        }
+        return ans;
     }
 };
 

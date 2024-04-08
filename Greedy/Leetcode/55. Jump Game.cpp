@@ -25,7 +25,7 @@ typedef vector<int> vi;
 const int N = (int)10e4;
 
 // Accepted
-// Greedy 
+// Greedy
 
 class Solution
 {
@@ -48,39 +48,90 @@ public:
 };
 
 // Accepted DP
+// Top Down
+class Solution
+{
+public:
+    vector<int> nums;
+    vector<int> dp;
+    int n;
+    bool solve(int currentIndex)
+    {
+        if (currentIndex >= n - 1)
+            return true;
 
-// class Solution
-// {
-// public:
-//     bool solve(const vector<int> &nums, vector<int> &memo, int currentIndex)
-//     {
-//         if (currentIndex == nums.size() - 1)
-//             return true;
+        if (dp[currentIndex] != -1)
+            return false;
 
-//         if (currentIndex >= nums.size() || nums[currentIndex] == 0)
-//             return false;
+        for (int i = currentIndex + 1; i <= currentIndex + nums[currentIndex]; i++)
+        {
+            bool result = solve(i);
+            if (result)
+                return true;
+        }
+        return dp[currentIndex] = false;
+    }
+    bool canJump(vector<int> &nums)
+    {
+        n = nums.size();
+        this->nums = nums;
+        dp = vector<int>(n, -1);
+        return solve(0);
+    }
+};
 
-//         if (memo[currentIndex] == 0)
-//             return memo[currentIndex];
+// DP Bottom Up 1
 
-//         bool jump = solve(nums, memo, currentIndex + nums[currentIndex]);
-//         if (jump)
-//             return true;
+class Solution
+{
+public:
+    bool canJump(vector<int> &nums)
+    {
+        int n = nums.size();
+        vector<int> dp(n, false);
+        dp[n - 1] = true;
+        for (int i = n - 2; i >= 0; i--)
+        {
+            for (int j = i + 1; j <= i + nums[i]; j++)
+            {
+                if (j >= n - 1 || dp[j])
+                {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[0];
+    }
+};
 
-//         for (int i = 1; i <= nums[currentIndex]; i++)
-//         {
-//             bool noJump = solve(nums, memo, currentIndex + i);
-//             if (noJump)
-//                 return true;
-//         }
-//         return memo[currentIndex] = false;
-//     }
-//     bool canJump(vector<int> &nums)
-//     {
-//         vector<int> memo(nums.size(), -1);
-//         return solve(nums, memo, 0);
-//     }
-// };
+// DP Bottom Up 2
+class Solution
+{
+public:
+    bool canJump(vector<int> &nums)
+    {
+        if (nums.size() <= 1)
+            return true;
+        if (nums[0] == 0)
+            return false;
+        int n = nums.size();
+        vector<int> dp(n, false);
+        dp[0] = true;
+        for (int i = 1; i <= n - 1; i++)
+        {
+            for (int j = i - 1; j >= 0; j--)
+            {
+                if (dp[j] && j + nums[j] >= i)
+                {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[n - 1];
+    }
+};
 
 int main()
 {

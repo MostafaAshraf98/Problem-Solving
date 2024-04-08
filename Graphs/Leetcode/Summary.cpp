@@ -136,10 +136,7 @@ int kruskal(vector<vector<int>> &edges, int n)
     priority_queue<Edge> pq;
     for (auto edge : edges)
     {
-        int from = edge[0];
-        int to = edge[1];
-        int cost = edge[2];
-        Edge newEdge(from, to, cost);
+        Edge newEdge(edge[0], edge[1], edge[2]);
         pq.push(newEdge);
     }
     UnionFind uf(n);
